@@ -57,12 +57,7 @@
 				</el-col>
 			</el-row>
 			<el-row   class="result-book">
-				<el-card  :key="book" v-for="book in books" class="col">
-					<div align="center"><a @click="toGoodsInfo(book.bookId)"><img src="../../../image/xiaowangzi.png"/></a></div>
-					<span :title="book.bookName">书名：<a @click="toGoodsInfo(book.bookId)">{{book.bookName}}</a></span>
-					<span :title="book.author">作者：{{book.author}}</span>
-					<span>价格：<strong  class="price-font">{{book.price}}</strong>&nbsp;&nbsp;(原价：<s>23.00</s>)</span>
-				</el-card>
+				<CommBookList :bookList="books"/>
 			</el-row>
 			<el-row class="page">
 				<el-col :span="24">
@@ -80,6 +75,7 @@
 </template>
 
 <script>
+import CommBookList from '../../../components/CommBookList';
 import { mapGetters } from 'vuex'
 	export default {
 		data() {
@@ -204,6 +200,7 @@ import { mapGetters } from 'vuex'
   		mounted(){
   		},
   		components: {
+  			CommBookList,
 		}
 	}
 
