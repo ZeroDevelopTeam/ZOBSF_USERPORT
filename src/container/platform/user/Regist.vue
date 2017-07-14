@@ -52,13 +52,11 @@
 				<el-form :model="validateEmailForm" :rules="validateEmailFormRules" ref="validateEmailForm">
 					<el-form-item label="用户邮箱" prop="email" :label-width="formLabelWidth">
 						<el-input v-model="validateEmailForm.email">
-							<template slot="append">
-								<el-button type="primary" @click.native="toEmail" :loading="addLoading">发送验证码</el-button>
-							</template>
+							<el-button slot="append" @click="toEmail" v-bind:disabled="valiState">{{valiText}}</el-button>
 						</el-input>
 					</el-form-item>
 					<el-form-item label="验证码" prop="code" :label-width="formLabelWidth">
-						<el-input v-model="validateEmailForm.code"></el-input>
+						<el-input v-model="validateEmailForm.code" v-bind:disabled="codeState"></el-input>
 					</el-form-item>
 				</el-form>
 				<div slot="footer" class="footer-button">
@@ -70,7 +68,7 @@
 		  	<!--注册成功 -->
 		  	<div class="text item" style="width: 450px;text-align: center;margin: auto;" v-if="step3">
 				<div style="height: 450px;width: 100%;">
-					<h2 style="line-height:250px;height: 250px;width: 100%;text-align: center;">密码修改成功，请牢记您的密码！</h2>
+					<h2 style="line-height:250px;height: 250px;width: 100%;text-align: center;">恭喜您注册成功！</h2>
 					<div class="footer-button">
 						<el-button  type="primary" @click="complete">返回首页</el-button>
 					</div>
@@ -83,12 +81,16 @@
 
 <script>
 import MyFooter from '../Footer';
-import { mapGetters } from 'vuex'
+import { mapGetters } from 'vuex';
   export default {
 		computed: {
 		 ...mapGetters([
-		 		'userList'
-   			])
+		 		'userList',
+		 		'recordTime'
+   			]),
+			valiText() {
+                return this.time > 0 && this.time < 60? this.time + 's 后重新获取验证码' : '获取验证码';
+            } 
 	    },
 		data() {
 			//用户名重复校验
@@ -107,38 +109,64 @@ import { mapGetters } from 'vuex'
 		        }
 		    };
 		    //密码校验
-			 const validatePass = (rule, value, callback) => {
+			const validatePass = (rule, value, callback) => {
 		        if (value === '') {
 		          callback(new Error('请输入密码'));
 		        } else {
 		        	this.passwordStrong(value);
-		          if (this.infoForm.reUserPsw !== '') {
+		        if (this.infoForm.reUserPsw !== '') {
 		            this.$refs.infoForm.validateField('reUserPsw');
-		          }
-		          callback();
 		        }
-		      };
-		      //确认密码校验
-		      const validatePass2 = (rule, value, callback) => {
+		          	callback();
+		        }
+		    };
+		    //确认密码校验
+		    const validatePass2 = (rule, value, callback) => {
 		        if (value === '') {
-		          callback(new Error('请再次输入密码'));
+		          	callback(new Error('请再次输入密码'));
 		        } else if (value !== this.infoForm.userPsw) {
-		          callback(new Error('两次输入密码不一致!'));
+		          	callback(new Error('两次输入密码不一致!'));
 		        } else {
-		          callback();
+		          	callback();
 		        }
-		      };
+		    };
+		    //邮箱验证码超时校验
+		    const validateEmailCode = (rule, value, callback) => {
+		    	if (value === '') {
+		          callback(new Error('请输入验证码'));
+		        }else if(new Date().getTime() - this.recordTime > 300000){//五分钟
+	      			callback(new Error('验证码超时，请重新获取验证码'));
+	      		}else if(value === this.rightCode){
+	      			callback();
+	      		}else{
+	      			callback(new Error('验证码输入错误'));
+	      		}
+		    };
+		    //邮箱校验
+		    const validateEmail = (rule, value, callback) => {
+		    	if (value === '') {
+		          callback(new Error('请输入邮箱'));
+		        }else{
+		        	this.valiState = false;
+		        	callback();
+		        }
+		    };
+		    
 			return {
-				step1:true,
-				step2:false,
-				step3:false,
-				alignCenter:true,
-				center:true,
-				active:1,
+				codeState:true,
+				valiState:true,//校验状态
+				rightCode:'123',
+				time:60,
+				step1:true,//步骤一
+				step2:false,//步骤二
+				step3:false,//步骤三
+				alignCenter:true,//步骤条居中
+				center:true,//步骤条居中
+				active:1,//默认第一个步骤
 				formLabelWidth: '120px',
 				addLoading:false,
-				showTexts:'',
-				colors:'',
+				showTexts:'',//密码强度校验文字
+				colors:'',//密码强度校验文字
 				infoFormRules: {
 					userCode: [
 						{ required: true, validator: validateUserCode, trigger: 'change' }
@@ -164,12 +192,12 @@ import { mapGetters } from 'vuex'
 				},
 				//邮箱验证规则
 				validateEmailFormRules: {
-/*					email: [
-						{ required: true, message: '请输入邮箱', trigger: 'change' },
+					email: [
+						{ required: true, validator: validateEmail, trigger: 'change' },
 						{ type: 'email', message: '请输入正确的邮箱地址（例如：123456@163.com）', trigger: 'blur,change' }
 					],
-*/					code: [
-						{ required: true, message: '请选择验证码', trigger: 'change' }
+					code: [
+						{ required: true, validator: validateEmailCode, trigger: 'change' }
 					]
 				},
 				//新增界面数据
@@ -177,14 +205,15 @@ import { mapGetters } from 'vuex'
 					userCode:'1',
 					userPsw: '111111',
 					reUserPsw:'111111',
-					userName:'1',
+					userName:'小明',
 					phone: '13111111111',
-					address: ''
+					address: '',
+					state:1,
 				},
 				//邮箱验证数据
 				validateEmailForm:{
-					email:'123456@163.com',
-					code:'123',
+					email:'',
+					code:'',
 				}
 			}
 		},
@@ -222,20 +251,27 @@ import { mapGetters } from 'vuex'
 					if (valid) {
 						this.addLoading = true;
 						let para = Object.assign({}, this.infoForm,this.validateEmailForm);
-						this.$store.dispatch('addUser',para).then((res) => {  
-							this.addLoading = false;
-							this.$refs['infoForm','validateEmailForm'].resetFields();
-							this.active++;
-							this.step1=false;
-							this.step2=false;
-							this.step3=true;
+						this.$store.dispatch('addUser',para).then((res) => {
+							if(res.status == 200){
+								this.addLoading = false;
+								this.$refs['infoForm','validateEmailForm'].resetFields();
+								this.active++;
+								this.step1=false;
+								this.step2=false;
+								this.step3=true;
+							}else{
+								this.$message({
+									message: res.msg,
+									type: 'error'
+								});
+							}
 				        });  
 					}
 				});
 			},
+			//下一步
 			nextStep(){
 				this.$refs.infoForm.validate((valid) => {
-					console.log(valid);
 					if (valid) {
 						this.active++;
 						this.step1=false;
@@ -244,15 +280,46 @@ import { mapGetters } from 'vuex'
 					}
 				});
 			},
+			//上一步
 			PreStep(){
 				this.active--;
 				this.step1=true;
 				this.step2=false;
 				this.step3=false;
 			},
-			toEmail(){
-				this.$message('发送验证码');
+			//倒计时
+			timing(){
+				if (this.time > 0) {
+					this.time--
+                	setTimeout(this.timing, 1000);
+                }
 			},
+			//发送验证码
+			toEmail(){
+				this.valiState=true;
+				this.codeState=false;
+				//记录发送验证码时间，用于超时验证
+				this.$store.dispatch('addRecordTime',new Date().getTime());
+				//发送验证码
+				/*this.$store.dispatch('sendVerifyCode',{userCode:this.infoForm.userCode,emailAddress:this.validateEmailForm.email}).then((res)=>{
+					console.log(res);
+					if(res.status == 200){//发送成功
+						this.rightCode = res.verifyCode;
+					}else{
+						this.$message({
+							message: res.msg,
+							type: 'error'
+						});
+					}
+				});*/
+				if (this.time > 0) {
+					this.timing();
+                }else{
+                	this.valiState=false;
+					this.$message('发送验证码');
+                }
+			},
+			//完成，返回首页
 			complete(){
 				sessionStorage.setItem('platformUser', JSON.stringify(Object.assign({}, this.infoForm,this.validateEmailForm)));
 				this.$router.push({ path: '/main' });

@@ -1,7 +1,22 @@
-import {USERLIST,USERINFO} from './types'
+import {USERLIST,USERINFO,RECORDTIME} from './types'
 import {get,post,del} from '../../api/api'
 
 export default {
+	//验证码计时
+	addRecordTime({commit},params){
+		commit(RECORDTIME, params)
+	},
+	
+	//发送验证码
+	sendVerifyCode({commit},params){
+		return new Promise((resolve, reject) => {
+			get('email/sendVerifyCode',params)
+	        .then(res => {
+	            resolve(res);
+	        })
+	    });
+	},
+	
 	//获取所有
 	getUserList({commit},params){
 		return new Promise((resolve, reject) => {
@@ -19,6 +34,16 @@ export default {
 			get('user/getUserByUserCode',params)
 	        .then(res => {
 	        	commit(USERINFO, res)
+	            resolve(res);
+	        })
+	    });
+	},
+	
+	//忘记密码重置
+	resetPsw({commit},params){
+		return new Promise((resolve, reject) => {
+			post('user/resetPsw',params)
+	        .then(res => {
 	            resolve(res);
 	        })
 	    });
@@ -43,24 +68,6 @@ export default {
 		delete params.updateDate;
 		return new Promise((resolve, reject) => {
 			post('user/editUser?roleIds='+roles,params)
-	        .then(res => {
-	            resolve(res);
-	        })
-	    });
-	},
-	//批量删除
-	removeUsers({commit},params){
-		return new Promise((resolve, reject) => {
-			del('user/deleteUsers',params)
-	        .then(res => {
-	            resolve(res);
-	        })
-	    });
-	},
-	//启用or停用
-	changeUserState({commit},params){
-		return new Promise((resolve, reject) => {
-			get('user/changeUserState',params)
 	        .then(res => {
 	            resolve(res);
 	        })

@@ -8,7 +8,7 @@
 		</el-steps>
 		<el-table
 		    ref="multipleTable"
-		    :data="cartGoods?cartGoods:[]"
+		    :data="myCart?myCart.list:[]"
 		    tooltip-effect="dark"
 		    style="width: 90%;margin-bottom: 30px;"
 		    @selection-change="handleSelectionChange"
@@ -27,16 +27,18 @@
 		      	</template>
 		    </el-table-column>
 		    <el-table-column
-		      	prop="price"
 		      	label="单价"
-		      	width="80">
+		      	width="120">
+		      	<template scope="scope">
+					{{ (scope.row.price*scope.row.discount).toFixed(2)  }}&nbsp;&nbsp;(<s>{{scope.row.price}}</s>)
+		      	</template>
 		    </el-table-column>
 		    <el-table-column
 		      	prop="num"
 		      	label="数量"
 		      	width="180">
 		      	<template scope="scope">
-			      	<el-input-number size="small" @change="handleChange" v-model="scope.row.num" :min="1" :max="10"></el-input-number>
+			      	<el-input-number size="small" @change="handleChange" v-model="scope.row.bookNum" :min="1" :max="10"></el-input-number>
 		      	</template>
 		      	
 		    </el-table-column>
@@ -45,7 +47,7 @@
 		      	label="总价"
 		      	width="80">
 		      	<template scope="scope">
-		      		{{ scope.row.price*scope.row.num }}
+		      		{{ (scope.row.price*scope.row.discount*scope.row.bookNum).toFixed(2) }}
 		      	</template>
 		    </el-table-column>
 		    <el-table-column label="操作" width="80">
@@ -66,7 +68,7 @@
 			</el-col>
 			<el-col :span="14">
 				<span  style="float: right;margin-right: 30px;">
-					总计（不含运费）：<span style="color: red;">${{sumPrice}}</span>
+					总计（不含运费）：<span style="color: red;">￥{{sumPrice}}</span>
 					<el-button style="margin-left: 20px;width: 100px;" size="small" type="danger" @click="handleSettlement">结算</el-button>
 				</span>
 			</el-col>
@@ -79,47 +81,67 @@ import { mapGetters } from 'vuex'
 	export default {
 		data() {
 		    return {
+		    	user:'',//当前用户
 		    	alignCenter:true,
 		    	center:true,
 		        multipleSelection: []
 		    }
 		},
 		methods: {
+			//计数器
 			handleChange(value){
 				console.log(value);
 			},
+			//复选框
 			handleSelectionChange(val) {
 		        this.multipleSelection = val;
 		    },
+		    //单个删除
 		    handleDelete(index,row){
-		    	this.cartGoods.splice(this.cartGoods.indexOf(row), 1);
+		    	this.$store.dispatch('deleteShopCart',{shopCartId:row.shopCartId,bookId:row.bookId}).then((res)=>{
+		    		if(res.status ==200){
+		    			//重新获取用户购物车信息
+						this.$store.dispatch('getCartByUserCode',{createUser:this.user.userCode,pageNum:1,pageSize:9999});
+		    		}else{
+		    			this.$message({
+				          	message: '删除商品失败',
+				          	type: 'error'
+				        });
+		    		}
+		    	});
 		    },
+		    //结算
 		    handleSettlement(){
 		    	this.$store.dispatch('toOrder',this.multipleSelection);
 		    	this.$router.push({ path: '/shoppingOrder', query: { flag: 'fromCart' } });
 		    },
+		    //批量删除
 		    batchDel(){
 		    	for(var i=0;i< this.multipleSelection.length;i++){
-		    		this.cartGoods.splice(this.cartGoods.indexOf(this.multipleSelection[i]), 1);
+		    		this.myCart.splice(this.myCart.indexOf(this.multipleSelection[i]), 1);
                 }
 		    },
   		},
   		computed:{
   			...mapGetters([
-				'cartGoods'
+				'myCart'
 	   		 ]),
 	        sumPrice(){
-	            var sum = 0 ;
+	            let sum = 0 ;
 	            for(var i=0;i< this.multipleSelection.length;i++){
-	                sum+=this.multipleSelection[i].price*this.multipleSelection[i].num;
+	                sum = (sum *1 + this.multipleSelection[i].price*this.multipleSelection[i].discount*this.multipleSelection[i].bookNum ).toFixed(2);
                 }
 	            return sum;
             }
         },
   		mounted(){
-  			/*const {bookId,num}=this.$route.query;
-  			console.log(bookId);
-  			console.log(num);*/
+			//当前用户
+  			const platformUser = JSON.parse(sessionStorage.getItem('platformUser'));
+  			if(platformUser){
+  				this.user = platformUser;
+	  			//获取用户购物车
+				this.$store.dispatch('getCartByUserCode',{createUser:platformUser.userCode,pageNum:1,pageSize:9999});
+  			}
   		},
   		components: {
 		}

@@ -3,84 +3,62 @@
 		<h2 ><strong class="title">{{$route.name}}</strong></h2>
 		<div class="my-order-detail">
 			<el-tabs v-model="activeName" type="card" @tab-click="handleClick">
-			    <el-tab-pane label="全部订单" name="all">
-			    	<el-card class="order-info" v-for="o in 5" :key="o">
-			    		<el-row class="info-title">
-			    			<strong>2017-06-27</strong>&nbsp;&nbsp;&nbsp;订单号: 11032278161636747
-			    		</el-row>
-			    		<el-row :gutter="20" class="info-detail">
-				    		<el-col :span="4">
-				    			<a @click="toGoodsInfo(o)"><img src="../../../image/xiaowangzi.png"/></a>
-				    		</el-col>
-				    		<el-col :span="10">
-				    			<p><strong title="小王子(65周年纪念版)"><a @click="toGoodsInfo(o)">小王子(65周年纪念版)</a></strong></p>
-								<p title="圣埃克苏佩里(Saint-Exupery) (作者), 林秀清 (译者)">圣埃克苏佩里(Saint-Exupery) (作者), 林秀清 (译者)</p>
-								<p>数量：1</p>
-								<p>单价：￥19</p>
-				    		</el-col>
-				    		<el-col :span="5">
-				    			<p><h2>总金额：￥19</h2></p>
-								<p>运费：￥0</p>
-				    		</el-col>
-				    		<el-col :span="5">
-				    			<p><h2>交易成功</h2></p>
-								<p><a href="">订单详情</a></p>
-				    		</el-col>
-			    		</el-row>
-			    	</el-card>
+			    <el-tab-pane label="全部订单" name="-2">
+			    	<CommOrder :dataList="myOrderList" :user="user" :state="state" :dispatch="dispatch"/>
 			    </el-tab-pane>
-			    <el-tab-pane label="待付款" name="waitPay">
+			    <el-tab-pane label="待付款" name="4">
+			    	<CommOrder :dataList="myOrderList" :user="user" :state="state" :dispatch="dispatch"/>
 			    </el-tab-pane>
-			    <el-tab-pane label="待收货" name="waitGet">
+			    <el-tab-pane label="待发货" name="1">
+			    	<CommOrder :dataList="myOrderList" :user="user" :state="state" :dispatch="dispatch"/>
 			    </el-tab-pane>
-			    <el-tab-pane label="待发货" name="waitDeliver">
+			    <el-tab-pane label="待收货" name="2">
+			    	<CommOrder :dataList="myOrderList" :user="user" :state="state" :dispatch="dispatch"/>
 			    </el-tab-pane>
-			    <el-tab-pane label="待评价" name="waitComment">
+			    <el-tab-pane label="交易关闭" name="3">
+			    	<CommOrder :dataList="myOrderList" :user="user" :state="state" :dispatch="dispatch"/>
+			    </el-tab-pane>
+			    <el-tab-pane label="废止订单" name="-1">
+			    	<CommOrder :dataList="myOrderList" :user="user" :state="state" :dispatch="dispatch"/>
 			    </el-tab-pane>
 			</el-tabs>
-			<el-row class="page">
-				<el-col :span="24">
-					<el-pagination
-				      @current-change="handleCurrentChange"
-				      :current-page="1"
-				      :page-size="10"
-				      layout="total,  prev, pager, next, jumper"
-				      :total="12">
-				    </el-pagination>
-				</el-col>
-			</el-row>
 		</div>
 	</section>
 </template>
 
 <script>
+	import { mapGetters } from 'vuex';
+	import CommOrder from '../../../components/CommOrder';
 	export default {
 		data() {
 			return {
-				activeName:'all',
+				user:'',//当前用户
+				state:-2,//分类状态(//类别  -2获取所有, -1废止，0已完成，1已付款待配送，2配送中，3取消订单，4未付款)
+				activeName:'-2',
+				dispatch:'getMyOrderList'
 			}
 		},
 		methods: {
-			handleCurrentChange(val) {
-		        console.log(`当前页: ${val}`);
-		    },
+			//标签切换
 		    handleClick(tab, event) {
-		        console.log(tab, event);
+		        this.state = Number(tab.name);
+		        this.$store.dispatch('getMyOrderList',{userCode:this.user.userCode,pageSize:10,pageNum:1,state:this.state});
 		    },
-		    //商品详情
-		    toGoodsInfo(bookId){
-		    	this.$router.push({ path: '/shopping', query: { bookId: '003' }});
-		    }
 		},
 		computed: {
+		 ...mapGetters([
+		 		'myOrderList',
+   			]),
 	    },
 		mounted() {
-			const user = sessionStorage.getItem('user');
-			this.$store.dispatch('getUser',{userCode:'001'}).then((res)=>{
-				this.editForm = res;
-			});
+			const platformUser = JSON.parse(sessionStorage.getItem('platformUser'));
+			if(platformUser){
+				this.user = platformUser;
+				this.$store.dispatch('getMyOrderList',{userCode:platformUser.userCode,pageSize:10,pageNum:1,state:-2});
+			}
 		},
 		components: {
+			CommOrder,
 		}
 	}
 
@@ -96,35 +74,6 @@
 		padding-top: 10px;
 		width: 90%;
 		margin: auto;
-		.order-info{
-			margin-bottom: 10px;
-			padding: 10px;
-			height: 150px;
-			width: 95%;
-			.info-detail{
-				margin-top: 10px;
-				p{
-					margin: 5px 0;
-					white-space:nowrap; 
-                    overflow:hidden;
-                    text-overflow:ellipsis;
-				}
-			}
-			.info-title{
-				padding-bottom: 10px;
-				border-bottom: 1px solid #D1DBE5;
-			}
-			img{
-				float: left;
-				margin-top: 10px;
-				width: 90px;
-				height: 90px;
-			}
-		}
-		.page{
-	        text-align: center;
-	        margin: 30px 0;
-	    }
 	}
 }
 </style>

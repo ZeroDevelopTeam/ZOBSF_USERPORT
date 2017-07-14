@@ -1,4 +1,4 @@
-import {USERLIST,USERINFO} from './types'
+import {USERLIST,USERINFO,RECORDTIME} from './types'
 	  
 export default {
 		[USERLIST](state,data) {
@@ -6,5 +6,8 @@ export default {
 		},
 		[USERINFO](state,data){
 				state.userInfo = data;
+		},
+		[RECORDTIME](state,data){
+				state.recordTime = data;
 		},
 }

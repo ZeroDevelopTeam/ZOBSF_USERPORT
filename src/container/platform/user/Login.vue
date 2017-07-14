@@ -69,11 +69,11 @@ import MyFooter from '../Footer';
       return { 
         logining: false,  
         expression: '',
-	      validate: '',
+	    validate: '',
         loginForm: {
-          userCode: '',
-          userPsw: '',
-          valResult:'',
+          	userCode: '',
+          	userPsw: '',
+          	valResult:'',
         },
         ruleLogin: {
           userCode: [
@@ -89,57 +89,44 @@ import MyFooter from '../Footer';
       };
     },
     methods: {
-      /*login(ev) {
+      	login(ev) {
         var _this = this;
-        this.$refs.loginForm.validate((valid) => {
-          if (valid) {
-            this.logining = true;
-            var loginParams = { userCode: this.loginForm.userCode, userPsw: this.loginForm.userPsw};
-            this.$store.dispatch('requestLogin',loginParams).then((data) => {  
-	              this.logining = false;
-	              if (data.status == 200) {
-	                sessionStorage.setItem('platformUser', JSON.stringify(data.user));
-	                this.$router.push({ path: '/main' });
-	              } else {
-	              	this.$message({
-	                  message: data.msg,
-	                  type: 'error'
-	                });
-	              }
-		        });  
-          } else {
-            console.log('error submit!!');
-            return false;
-          }
-        });
-      },*/
-      login(ev) {
-        var _this = this;
-        this.$refs.loginForm.validate((valid) => {
-          if (valid) {
-            this.logining = true;
-            var loginParams = { userCode: this.loginForm.userCode, userPsw: this.loginForm.userPsw,userName:'管理员'};
-            sessionStorage.setItem('platformUser', JSON.stringify(loginParams));
-            this.$router.push({ path: '/main' });
-          } else {
-            console.log('error submit!!');
-            return false;
-          }
-        });
-      },
-      //验证码
-      renderCode() {
-			    //定义expression和result，expression是字符串，result可能是字符串也可能是数字
-			    let expression = '';
-			      let  result = '';
-			        let codeNormal = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';//字母库
-			        for (var i =0; i < 4; i ++) {
-			            result = result + codeNormal[Math.round(Math.random()*(codeNormal.length-1))];
-			        }//随机获取字母四个
-			        expression = result.toLowerCase();//忽略大小写
-			    		//设置更新状态
-			        this.expression= expression;
-			        this.validate= result;
+	        this.$refs.loginForm.validate((valid) => {
+	          	if (valid) {
+	            	this.logining = true;
+	            	var loginParams = { userCode: this.loginForm.userCode, userPsw: this.loginForm.userPsw};
+	            	this.$store.dispatch('requestLogin',loginParams).then((data) => {  
+		              	this.logining = false;
+		              	if (data.status == 200) {
+	                		sessionStorage.setItem('platformUser', JSON.stringify(data.user));
+		                	this.$router.push({ path: '/main' });
+		              	} else {
+		              		this.renderCode();//登入失败，重新获取验证码
+		              		this.$message({
+		                  		message: data.msg,
+		                  		type: 'error'
+		                	});
+		              	}
+			        });  
+	          	} else {
+		            console.log('error submit!!');
+		            return false;
+	          	}
+	        });
+	    },
+        //验证码
+        renderCode() {
+		    //定义expression和result，expression是字符串，result可能是字符串也可能是数字
+		    let expression = '';
+		      let  result = '';
+		        let codeNormal = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';//字母库
+		        for (var i =0; i < 4; i ++) {
+		            result = result + codeNormal[Math.round(Math.random()*(codeNormal.length-1))];
+		        }//随机获取字母四个
+		        expression = result.toLowerCase();//忽略大小写
+		    		//设置更新状态
+		        this.expression= expression;
+		        this.validate= result;
 			}
 		},
 		mounted() {

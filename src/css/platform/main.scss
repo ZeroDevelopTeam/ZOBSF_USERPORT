@@ -47,6 +47,9 @@
         .item {
             padding: 9% 0;
             border-bottom: 1px dashed #BFCBD9;
+            overflow:hidden;
+            text-overflow:ellipsis;
+            text-align: center;
         }
         .clearfix:before,.clearfix:after {
             display: table;

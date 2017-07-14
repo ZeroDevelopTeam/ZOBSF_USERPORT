@@ -1,7 +1,11 @@
 import axios from 'axios';
 import {Host} from './Host';
+const platformUser = sessionStorage.getItem('platformUser')?JSON.parse(sessionStorage.getItem('platformUser')):'';
 var api = axios.create({
-    headers: {'content-type': 'application/json;charset=utf-8'},
+    headers: {
+    	'user_id':platformUser.userCode,
+    	'content-type': 'application/json;charset=utf-8'
+    },
     baseURL:`${Host}`,
     timeout: 3000
 });

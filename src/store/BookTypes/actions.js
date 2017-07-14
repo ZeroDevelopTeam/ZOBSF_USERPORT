@@ -1,12 +1,12 @@
-import {get, post, del} from '../../api/api'
-import {GETTREE, GETBYID} from './mutation_types'
+import {get} from '../../api/api'
+import {BOOKTYPETREE, BOOKTYPEINFO} from './mutation_types'
 export default {
 	//获取分类树
 	getBookTypeTree({commit},params) {
 		return new Promise((resolve, reject) => {
 			get('bookType/getTree',params)
 	        .then(res => {
-	        	commit(GETTREE, res);
+	        	commit(BOOKTYPETREE, res);
 	            resolve(res);
 	        })
 	    });
@@ -16,34 +16,7 @@ export default {
 		return new Promise((resolve, reject) => {
 			get('bookType/getBookTypeByTypeId',params)
 	        .then(res => {
-	        	commit(GETBYID, res);
-	            resolve(res);
-	        })
-	    });
-	},
-	//通过id删除
-	deleteBookTypeById({commit},params) {
-		return new Promise((resolve, reject) => {
-			del('bookType/deleteBookType',params)
-	        .then(res => {
-	            resolve(res);
-	        })
-	    });
-	},
-	//修改分类
-	editBookType({commit},params) {
-		return new Promise((resolve, reject) => {
-			post('bookType/editBookType',params)
-	        .then(res => {
-	            resolve(res);
-	        })
-	    });
-	},
-	//新增分类
-	addBookType({commit},params) {
-		return new Promise((resolve, reject) => {
-			post('bookType/addBookType?level='+params.level,params.bookType)
-	        .then(res => {
+	        	commit(BOOKTYPEINFO, res);
 	            resolve(res);
 	        })
 	    });

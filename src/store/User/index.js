@@ -5,6 +5,7 @@ import getters from './getters.js';
 const state = {
     userList: [],
     userInfo:{},
+    recordTime:0,
 }
 export default {
     state,

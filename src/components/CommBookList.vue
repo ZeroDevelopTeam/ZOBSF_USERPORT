@@ -1,8 +1,8 @@
 <template>
 	<el-row class="book-list">
-		<el-card :key="book" v-for="book in bookList" class="col">
-			<div align="center"><a @click="toGoodsInfo(book.bookId)"><img src="../image/xiaowangzi.png"/></a></div>
-			<span :title="book.bookName"><a @click="toGoodsInfo(book.bookId)">{{book.bookName}}</a></span>
+		<el-card :key="book" v-for="book in books" class="col">
+			<div align="center"><a @click="toGoodsInfo(book.bookId,book.typeId)"><img src="../image/xiaowangzi.png"/></a></div>
+			<span :title="book.bookName"><a @click="toGoodsInfo(book.bookId,book.typeId)">{{book.bookName}}</a></span>
 			<span :title="book.author">{{book.author}}</span>
 			<span><strong  class="price-font">{{book.price}}</strong>&nbsp;&nbsp;(<s>23.00</s>)</span>
 		</el-card>
@@ -12,7 +12,7 @@
 <script>
 	export default {
 		props: [
-			'bookList',
+			'books',
 		],
 		data() {
 			return {
@@ -22,8 +22,8 @@
 		},
 		methods: {
 			//商品详情
-		    toGoodsInfo(bookId){
-		    	this.$router.push({ path: '/shopping', query: { bookId: '003' }});
+		    toGoodsInfo(bookId,typeId){
+		    	this.$router.push({ path: '/shopping', query: { bookId: bookId,typeId: typeId}});
 		    }
 		}
 	}

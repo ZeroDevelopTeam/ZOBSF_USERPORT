@@ -5,6 +5,10 @@ import getters from './getters';
 const state = {
 	bookList: [],
 	bookInfo: {},
+	bookListByType:[],
+	hotBook: [],
+	cheapBook: [],
+	newBook: [],
 }
 export default {
     state,

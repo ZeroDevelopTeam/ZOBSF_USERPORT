@@ -5,4 +5,7 @@ export default {
 	userInfo:(state) =>{
 		return state.userInfo;
 	},
+	recordTime:(state) =>{
+		return state.recordTime;
+	},
 }

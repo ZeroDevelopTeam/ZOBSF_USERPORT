@@ -13,6 +13,11 @@ export default {
 	//立即购买
 	toBuy({commit},params){
     	commit(BUYGOODS, params)
-    }
+   },
+	
+	//立即购买
+	toBuy1(){
+		
+	}
 }
 
